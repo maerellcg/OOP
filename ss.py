@@ -12,7 +12,7 @@ c=conn.cursor()
 
 
 def submit(): 
-    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg.db')
+    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg/maerelle.db')
     c=conn.cursor()
 
     c.execute("INSERT INTO student_info VALUES(:f_name,:l_name,:age,:address,:email)",
@@ -34,7 +34,7 @@ def submit():
     email.delete(0,END)
 
 def query():
-    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg.db')
+    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg/maerelle.db')
     c=conn.cursor()
     c.execute("SELECT *,oid FROM student_info")
     records=c.fetchall()
@@ -49,39 +49,61 @@ def query():
     conn.close()
 
 def delete():
-    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg.db')
+    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg/maerelle.db')
     c=conn.cursor()
     c.execute("DELETE from student_info WHERE oid="+delete_box.get())
 
-    conn.comit()
+    conn.commit()
     conn.close()
+
+def update():
+
+    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg/maerelle.db')
+    c=conn.cursor()
+
+    record_id=delete_box.get()
+    c.execute(""" UPDATE student_info SET
+        f_name=:first,
+        l_name=:last,
+        age=:age,
+        address=:address,
+        email=:email
+
+        WHERE oid=:oid""",
+            {
+                'first':f_name_editor.get(),
+                'last':l_name_editor.get(),
+                'age':age_editor.get(),
+                'address':address_editor.get(),
+                'email':email_editor.get(),
+                'oid':record_id
+        
+
+                })
+
+    conn.commit()
+    conn.close()
+
+
 
 def edit():
     editor=Tk()
     editor.title('Update Record from database')
     editor.geometry("500x500")
 
-    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg.db')
+    conn=sqlite3.connect('C:/Users/STUDENTS/Desktop/gg/maerelle.db')
     c=conn.cursor()
 
     record_id=delete_box.get()
-    c.execute("SELECT * FROM student_info WHERE oid="+record_id)
+    c.execute("SELECT * FROM student_info WHERE oid=" +record_id)
     records=c.fetchall()
 
+    global f_name_editor
+    global l_name_editor
+    global age_editor
+    global address_editor
+    global email_editor
     
-    for record in records:
-
-        f_name_editor.insert(0,record[0])
-        l_name_editor.insert(0,record[1])
-        age_editor.insert(0,record[2])
-        address_editor.insert(0,record[3])
-        email_editor.insert(0,record[4])
-
-    print_records=''
-    for record in records:
-        print_records+str(record[0])+" "+str(record[1])+" "+str(record[2])+" "+str(record[3])+" "+str(record[4])+" "+"\t"+str(record[5])+"\n"
-
-
     f_name_editor=Entry(editor,width=30)
     f_name_editor.grid(row=0,column=1,padx=20,pady=(10,0))
     l_name_editor=Entry(editor,width=30)
@@ -93,14 +115,41 @@ def edit():
     email_editor=Entry(editor,width=30)
     email_editor.grid(row=4,column=2,padx=20)
 
+    f_name_label=Label(editor,text="First Name")
+    f_name_label.grid(row=0,column=0)
+    l_name_label=Label(editor,text="Last Name")
+    l_name_label.grid(row=1,column=0)
+    age_label_label=Label(editor,text= "Age")
+    age_label_label.grid(row=2,column=0)
+    address_label_label=Label(editor,text= "Address")
+    address_label_label.grid(row=3,column=0)
+    email_label_label=Label(editor,text= "Email")
+    email_label_label.grid(row=4,column=0)
+
+
+    for record in records:
+       f_name_editor.insert(0, record[0])
+       l_name_editor.insert(0, record[1])
+       age_editor.insert(0, record[2])
+       address_editor.insert(0, record[3])
+       email_editor.insert(0, record[4])
+       
+       
+
+    save_btn=Button(editor,text="Save Record", command=update)
+    save_btn.grid(row=10, column=0, columnspan=2,pady=10,padx=10,ipadx=140)
+
+
     conn.commit()
     conn.close()
+
+    
 '''
-c.execute ("""CREATE TABLE "students_info"(
-          "f_name" TEXT,
-          "l_name" TEXT,
+c.execute("""CREATE TABLE "student_info" (
+          "f_name"      TEXT,
+          "l_name"      TEXT,
           "age" INTEGER,
-          "address" TEXT,
+          "address"     TEXT,
           "email" TEXT,
 )""")
 '''
@@ -141,16 +190,17 @@ query_btn=Button(root,text="Show Records",command=query)
 query_btn.grid(row=7,column=0,columnspan=2,pady=10,padx=10,ipadx=137)
 
 delete_box=Entry(root,width=30)
-delete_box.grid(row=10,column=0)
+delete_box.grid(row=10,column=1)
 
 delete_box_label=Label(root,text= "Select ID.No")
 delete_box_label.grid(row=10,column=0)
 
-query_btn=Button(root,text="Delete Records",command=query)
+query_btn=Button(root,text="Delete Records",command=delete)
 query_btn.grid(row=12,column=0,columnspan=2,pady=10,padx=10,ipadx=136)
 
 edit_btn=Button(root,text= "Edit Record", command=edit)
 edit_btn.grid(row=8,column=0,columnspan=2,pady=10,padx=10,ipadx=136)
+
                                                                                                                           
 root.mainloop()
 
